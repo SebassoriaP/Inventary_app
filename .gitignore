@@ -1,0 +1,47 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.buildlog/
+build/
+pubspec.lock
+
+# Flutter generated files
+flutter_export_environment.sh
+flutter_export_environment.bat
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks/
+ios/Pods/
+ios/build/
+**/*.xcworkspace
+**/DerivedData/
+ios/.generated/
+
+# Android
+android/.gradle/
+android/app/build/
+*.iml
+*.keystore
+local.properties
+
+# Web
+web/.dart_tool/
+web/build/
+
+# Environment files
+.env
+.env.*
+firebase_options.dart
+
+# Editor settings
+.vscode/
+.idea/
+*.log
+.DS_Store
+
+# Firebase config (opcional si usas manual setup)
+google-services.json
+GoogleService-Info.plist
