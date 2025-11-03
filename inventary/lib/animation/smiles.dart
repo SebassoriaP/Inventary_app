@@ -1,14 +1,15 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
+import '../utils/color_palette.dart';
 
 class SawCurveIntro extends StatefulWidget {
   const SawCurveIntro({
     super.key,
     this.duration = const Duration(milliseconds: 1600),
-    this.sawSize = 84,
-    this.strokeWidth = 16,
-    this.color = const Color(0xFFF27A07), // naranja
+    this.sawSize = 150,
+    this.strokeWidth = 21,
+    this.color = AserraderoColorPalette.orange,
     this.onFinished,
   });
 
@@ -28,27 +29,57 @@ class _SawCurveIntroState extends State<SawCurveIntro>
   late final Animation<double> _t; // 0..1 progreso
 
   Path? _cachedPath;
+  Size? _lastSize;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: widget.duration);
+    _t = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+    // Nota: NO arrancamos aquí. Lo haremos en didChangeDependencies
+    // después de precargar la imagen y del primer frame.
+  }
+
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  precacheImage(const AssetImage('assets/saw2.png'), context).then((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted && !_c.isAnimating && _c.value == 0.0) {
+        // 👇 Espera 200 ms antes de iniciar
+        await Future.delayed(const Duration(milliseconds: 105));
+        _c.forward().whenComplete(() => widget.onFinished?.call());
+      }
+    });
+  });
+}
+
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
 
   Path _buildPath(Size size) {
     // === Ajusta estos puntos para calcar tu curva exacta ===
     final w = size.width;
     final h = size.height;
 
-    // Inicio cerca de la sierra (izquierda)
-    final start = Offset(w * 0.18, h * 0.55);
+    final start = Offset(w * 0.20, h * 0.48);
 
-    // Primer tramo curvo
-    final c1 = Offset(w * 0.28, h * 0.70);
-    final c2 = Offset(w * 0.48, h * 0.48);
-    final p1 = Offset(w * 0.38, h * 0.58);
+    // Tramo 1 correcto (tal cual)
+    final c1 = Offset(w * 0.30, h * 0.80);
+    final c2 = Offset(w * 0.46, h * 0.84);
+    final p1 = Offset(w * 0.48, h * 0.86);
 
-    // Segundo tramo curvo
-    final c3 = Offset(w * 0.58, h * 0.75);
-    final c4 = Offset(w * 0.78, h * 0.52);
-    final p2 = Offset(w * 0.68, h * 0.60);
+    // Tramo 2 (igualado pero con p2 alto)
+    final c3 = Offset(w * 0.55, h * 0.88); // espejo de c2 respecto a p1 (aprox)
+    final c4 = Offset(w * 0.62, h * 0.86); // llegada parecida en “peso”
+    final p2 = Offset(w * 0.68, h * 0.80);
 
-    // Final suave
-    final end = Offset(w * 0.88, h * 0.62);
+    // Final
+    final end = Offset(w * 0.85, h * 0.48);
 
     final path = Path()
       ..moveTo(start.dx, start.dy)
@@ -64,26 +95,19 @@ class _SawCurveIntroState extends State<SawCurveIntro>
     return path;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(vsync: this, duration: widget.duration);
-    _t = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
-    _c.forward().whenComplete(() => widget.onFinished?.call());
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
+  Path _buildOrUpdatePath(Size size) {
+    if (_cachedPath == null || _lastSize != size) {
+      _lastSize = size;
+      _cachedPath = _buildPath(size);
+    }
+    return _cachedPath!;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final size = Size(constraints.maxWidth, constraints.maxHeight);
-      _cachedPath ??= _buildPath(size);
-      final path = _cachedPath!;
+      final path = _buildOrUpdatePath(size);
 
       return AnimatedBuilder(
         animation: _t,
@@ -103,6 +127,7 @@ class _SawCurveIntroState extends State<SawCurveIntro>
 
           return Stack(
             fit: StackFit.expand,
+            clipBehavior: Clip.none, // evita que se recorte la sierra grande
             children: [
               CustomPaint(
                 painter: _LinePainter(path, widget.color, widget.strokeWidth),
