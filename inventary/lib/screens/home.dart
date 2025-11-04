@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import '../animation/smiles.dart'; 
+import '../animation/smiles.dart';
+import '../widgets/button.dart';
+import '../utils/color_palette.dart';
+import './inv_creation.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,31 +16,44 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "PRUEBAAAAA",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
       body: SafeArea(
         child: Column(
           children: [
-            // Franja superior con la animación (ajusta altura a tu gusto)
-            SizedBox(
-              height: 220,
-              width: double.infinity,
-              child: SawCurveIntro(
-                // onFinished: () => Navigator.pushReplacementNamed(context, '/home'),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center, // centra verticalmente dentro del espacio
+                children: [
+                  SizedBox(
+                    height: 220,
+                    width: double.infinity,
+                    child: SawCurveIntro(),
+                  ),
+
+
+           
+                  Image.asset(
+                    'assets/tangare.png', 
+                    width: 200,
+                    height: 150,
+                    fit: BoxFit.contain,
+                  ),
+                ],
               ),
             ),
 
-            // Resto de tu pantalla...
-            Expanded(
-              child: Center(
-                child: Text(
-                  'Contenido de Home',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              child: ButtonWidget(
+                text: 'Bienvenida Patricia',
+                color: TangareColor.orange,
+                textColor: TangareColor.white,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const InventaryScreen()),
+                  );
+                },
               ),
             ),
           ],

@@ -9,7 +9,7 @@ class SawCurveIntro extends StatefulWidget {
     this.duration = const Duration(milliseconds: 1600),
     this.sawSize = 150,
     this.strokeWidth = 21,
-    this.color = AserraderoColorPalette.orange,
+    this.color = TangareColor.orange,
     this.onFinished,
   });
 
