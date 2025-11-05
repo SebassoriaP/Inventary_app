@@ -4,13 +4,13 @@ import '../utils/color_palette.dart';
 class InventaryButtonWidget extends StatelessWidget {
   final String text;
   final Color color;
-  final VoidCallback onPressed;      // editar (lápiz)
+  final VoidCallback onPressed;      
   final Color textColor;
   final double height;
   final int quantity;
   final bool isEditing;
 
-  // 👇 nuevos callbacks opcionales
+  //nuevos callbacks opcionales
   final VoidCallback? onIncrement;
   final VoidCallback? onDecrement;
   final VoidCallback? onSave;
@@ -32,8 +32,7 @@ class InventaryButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // si quieres que todo el card active edición al tocarse:
-      // onTap: onPressed,
+
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(

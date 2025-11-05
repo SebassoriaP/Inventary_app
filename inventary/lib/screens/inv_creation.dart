@@ -83,7 +83,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
                     text: itemName,
                     quantity: displayCantidad,
                     isEditing: _isEditing(id),
-                    // 👉 Editar (toggle modo edición)
+                    // Editar (toggle modo edición)
                     onPressed: () {
                       setState(() {
                         final current = _isEditing(id);
@@ -94,14 +94,14 @@ class _InventaryScreenState extends State<InventaryScreen> {
                         }
                       });
                     },
-                    // 👉 Botón +
+                    // Botón +
                     onIncrement: () {
                       setState(() {
                         final current = _tempQuantities[id] ?? baseCantidad;
                         _tempQuantities[id] = current + 1;
                       });
                     },
-                    // 👉 Botón -
+                    // Botón -
                     onDecrement: () {
                       setState(() {
                         final current = _tempQuantities[id] ?? baseCantidad;
