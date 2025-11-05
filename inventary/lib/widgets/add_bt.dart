@@ -1,53 +1,68 @@
 import 'package:flutter/material.dart';
-import '../utils/color_palette.dart';
+import 'package:inventary/utils/color_palette.dart';
 
-class ButtonWidget extends StatelessWidget {
-  final String text;
+class FooterWidget extends StatelessWidget {
   final VoidCallback onPressed;
-  final Color textColor;
-  final double height;
-  final Color backgroundColor;
 
-  const ButtonWidget({
+  final Color topColor; // color mitad superior
+  final Color bottomColor; // color mitad inferior
+
+  const FooterWidget({
     super.key,
-    required this.text,
     required this.onPressed,
-    required this.backgroundColor,
-    this.textColor = Colors.white,
-    this.height = 55,
+    this.topColor = Colors.transparent,
+    this.bottomColor = TangareColor.orange,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
+      alignment: Alignment.topCenter,
       children: [
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor,
-            foregroundColor: textColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(50),
+        // Fondo dividido
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 30, // mitad del botón
+              color: topColor,
             ),
-            minimumSize: Size(double.infinity, height),
-          ),
-          child: Text(
-            text,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            Container(
+              color: bottomColor,
+              padding: const EdgeInsets.only(top: 30, bottom: 20),
+              width: double.infinity,
+            ),
+          ],
+        ),
+
+        // Botón circular encima
+        Positioned(
+          top: 0,
+          child: Material(
+            shape: const CircleBorder(),
+            color: Colors.transparent,
+            child: Ink(
+              decoration: BoxDecoration(
+                color: TangareColor.lightYellow,
+                shape: BoxShape.circle,
+                border: Border.all(color: TangareColor.orange, width: 10),
+              ),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onPressed,
+                child: const SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: Icon(
+                    Icons.add,
+                    color: TangareColor.darkOrange,
+                    size: 50,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
-          '-Tocar para editar-',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontStyle: FontStyle.italic,
-            color: TangareColor.darkOrange,
-          ),
-        ),
-        const SizedBox(height: 10),
       ],
     );
   }
