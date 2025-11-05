@@ -46,6 +46,7 @@ class InventaryButtonWidget extends StatelessWidget {
                     ),
                     child: Text(
                       text,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: textColor,
                         fontWeight: FontWeight.bold,
@@ -73,6 +74,7 @@ class InventaryButtonWidget extends StatelessWidget {
                         color: TangareColor.darkOrange,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
