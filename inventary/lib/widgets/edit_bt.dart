@@ -4,11 +4,16 @@ import '../utils/color_palette.dart';
 class InventaryButtonWidget extends StatelessWidget {
   final String text;
   final Color color;
-  final VoidCallback onPressed;
+  final VoidCallback onPressed;      // editar (lápiz)
   final Color textColor;
   final double height;
   final int quantity;
   final bool isEditing;
+
+  // 👇 nuevos callbacks opcionales
+  final VoidCallback? onIncrement;
+  final VoidCallback? onDecrement;
+  final VoidCallback? onSave;
 
   const InventaryButtonWidget({
     super.key,
@@ -19,11 +24,16 @@ class InventaryButtonWidget extends StatelessWidget {
     this.height = 55,
     required this.quantity,
     this.isEditing = false,
+    this.onIncrement,
+    this.onDecrement,
+    this.onSave,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // si quieres que todo el card active edición al tocarse:
+      // onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -35,6 +45,7 @@ class InventaryButtonWidget extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                
                 Expanded(
                   flex: 3,
                   child: Container(
@@ -48,7 +59,7 @@ class InventaryButtonWidget extends StatelessWidget {
                       text,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: textColor,
+                        color: TangareColor.darkOrange,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -58,7 +69,7 @@ class InventaryButtonWidget extends StatelessWidget {
 
                 const SizedBox(width: 10),
 
-      
+                
                 Expanded(
                   flex: 1,
                   child: Container(
@@ -82,7 +93,7 @@ class InventaryButtonWidget extends StatelessWidget {
 
                 const SizedBox(width: 10),
 
-              
+                //Edition Button
                 Container(
                   width: 65,
                   height: 65,
@@ -97,31 +108,76 @@ class InventaryButtonWidget extends StatelessWidget {
                       color: TangareColor.white,
                       size: 50,
                     ),
-                    onPressed: onPressed, 
+                    onPressed: onPressed,
                   ),
                 ),
               ],
             ),
-            
+
             if (isEditing) ...[
               const SizedBox(height: 12),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      debugPrint('Reducir cantidad');
-                    },
-                    child: const Icon(Icons.remove),
-                  ),
                   
-                  ElevatedButton(
-                    onPressed: () {
-                       debugPrint('Aumentar cantidad');
-                    },
-                    child: const Icon(Icons.add),
+                  SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: ElevatedButton(
+                      onPressed: onDecrement,
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(), // Complete circle
+                        padding: EdgeInsets.zero,
+                        backgroundColor: TangareColor.white,
+                        foregroundColor: TangareColor.orange,
+                        elevation: 4,
+                      ),
+                      child: const Icon(Icons.remove, size: 36),
+                    ),
+                  ),
+
+                  
+                  SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: ElevatedButton(
+                      onPressed: onIncrement,
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: EdgeInsets.zero,
+                        backgroundColor: TangareColor.white,
+                        foregroundColor: TangareColor.orange,
+                        elevation: 4,
+                      ),
+                      child: const Icon(Icons.add, size: 36),
+                    ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 15),
+
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onSave,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TangareColor.yellow,
+                    foregroundColor: TangareColor.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'GUARDAR',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
               ),
             ],
           ],
