@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventary/utils/color_palette.dart';
 import '../widgets/edit_bt.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -62,7 +63,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
 
               return ListView.separated(
                 itemCount: docs.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, __) => const SizedBox(height: 20),
                 itemBuilder: (context, index) {
                   final doc = docs[index];
                   final data = doc.data() as Map<String, dynamic>;
@@ -83,7 +84,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
                     text: itemName,
                     quantity: displayCantidad,
                     isEditing: _isEditing(id),
-                    // 👉 Editar (toggle modo edición)
+                    // Editar (toggle modo edición)
                     onPressed: () {
                       setState(() {
                         final current = _isEditing(id);
@@ -94,14 +95,14 @@ class _InventaryScreenState extends State<InventaryScreen> {
                         }
                       });
                     },
-                    // 👉 Botón +
+                    // Botón +
                     onIncrement: () {
                       setState(() {
                         final current = _tempQuantities[id] ?? baseCantidad;
                         _tempQuantities[id] = current + 1;
                       });
                     },
-                    // 👉 Botón -
+                    // Botón -
                     onDecrement: () {
                       setState(() {
                         final current = _tempQuantities[id] ?? baseCantidad;
@@ -126,7 +127,14 @@ class _InventaryScreenState extends State<InventaryScreen> {
 
                         ScaffoldMessenger.of(this.context).showSnackBar(
                           const SnackBar(
-                            content: Text('Inventario actualizado'),
+                            content: Text(
+                              'Inventario actualizado',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: TangareColor.white
+                              )
+                            ),
+                            backgroundColor: TangareColor.darkOrange,
                           ),
                         );
                       } catch (e) {
@@ -134,7 +142,48 @@ class _InventaryScreenState extends State<InventaryScreen> {
 
                         ScaffoldMessenger.of(this.context).showSnackBar(
                           SnackBar(
-                            content: Text('Error al guardar: $e'),
+                            content: Text(
+                              'Error al guardar: $e',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: TangareColor.white
+                              )
+                            ),
+                            backgroundColor: TangareColor.darkOrange,                            
+                          ),
+                        );
+                      }
+                    },
+                    onDelete: () async {
+                      try {
+                        await doc.reference.delete();
+
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Elemento "$itemName" eliminado del inventario',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: TangareColor.white
+                              )
+                            ),
+                            backgroundColor: TangareColor.darkOrange,
+                          ),
+                        );
+
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(this.context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Error al eliminar: $e',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: TangareColor.white
+                              )
+                            ),
+                            backgroundColor: TangareColor.darkOrange,
                           ),
                         );
                       }
