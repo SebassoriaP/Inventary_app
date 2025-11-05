@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:inventary/utils/color_palette.dart';
+
 import '../widgets/edit_bt.dart';
 import '../widgets/search_bar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/add_bt.dart';
+
 
 class InventaryScreen extends StatefulWidget {
   const InventaryScreen({super.key});
@@ -37,6 +41,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
+      
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
@@ -244,12 +249,42 @@ class _InventaryScreenState extends State<InventaryScreen> {
                       },
                     );
                   },
-                ),
+                ),                
               ),
             ],
           ),
         ),
       ),
+
+      bottomNavigationBar: Builder(
+          builder: (context) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FooterWidget(
+                  onPressed: () {
+                    debugPrint('Me presionaste');
+                  },
+                ),
+
+                Container(
+                  width: double.infinity,
+                  color: TangareColor.orange,
+                  padding: const EdgeInsets.only(top: 5, bottom: 40),
+                  child: const Text(
+                    'Agregar Nuevo Item',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: TangareColor.white,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
     );
   }
 }
