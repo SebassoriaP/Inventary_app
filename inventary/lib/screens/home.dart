@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../animation/smiles.dart';
 import '../widgets/button.dart';
 import '../utils/color_palette.dart';
-import './inv_creation.dart';
+import 'inventary.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -57,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) =>
-                                    const InventaryScreen()),
+                                    const InventaryPanel()),
                           );
                         },
                       ),
@@ -98,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  const InventaryScreen()),
+                                  const InventaryPanel()),
                         );
                       },
                     ),

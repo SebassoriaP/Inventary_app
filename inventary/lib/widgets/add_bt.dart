@@ -11,7 +11,7 @@ class FooterWidget extends StatelessWidget {
     super.key,
     required this.onPressed,
     this.topColor = Colors.transparent,
-    this.bottomColor = TangareColor.orange,
+    this.bottomColor = TangareColor.black,
   });
 
   @override
