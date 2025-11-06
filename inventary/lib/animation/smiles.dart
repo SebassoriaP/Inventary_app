@@ -139,7 +139,7 @@ void didChangeDependencies() {
                   angle: angle,
                   alignment: Alignment.center,
                   child: Image.asset(
-                    'assets/saw2.png',
+                    'assets/saw.png',
                     width: widget.sawSize,
                     height: widget.sawSize,
                   ),
