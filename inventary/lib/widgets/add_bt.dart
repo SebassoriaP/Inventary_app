@@ -4,8 +4,8 @@ import 'package:inventary/utils/color_palette.dart';
 class FooterWidget extends StatelessWidget {
   final VoidCallback onPressed;
 
-  final Color topColor; // color mitad superior
-  final Color bottomColor; // color mitad inferior
+  final Color topColor; 
+  final Color bottomColor; 
 
   const FooterWidget({
     super.key,
