@@ -3,9 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:inventary/utils/color_palette.dart';
 
-import '../widgets/edit_bt.dart';
-import '../widgets/search_bar.dart';
-import '../widgets/add_bt.dart';
+import '../../widgets/edit_bt.dart';
+import '../../widgets/search_bar.dart';
+import '../../widgets/add_bt.dart';
 
 
 class InventaryScreen extends StatefulWidget {
@@ -194,9 +194,10 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: TangareColor.white,
+                                    fontSize: 19,
                                   ),
                                 ),
-                                backgroundColor: TangareColor.darkOrange,
+                                backgroundColor: TangareColor.orange,
                               ),
                             );
                           } catch (e) {
@@ -208,9 +209,10 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: TangareColor.white,
+                                    fontSize: 19,
                                   ),
                                 ),
-                                backgroundColor: TangareColor.darkOrange,
+                                backgroundColor: TangareColor.orange,
                               ),
                             );
                           }
@@ -233,14 +235,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Inventario",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-      
+    return Scaffold(      
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
@@ -387,9 +382,10 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: TangareColor.white,
+                                      fontSize: 19,
                                     ),
                                   ),
-                                  backgroundColor: TangareColor.darkOrange,
+                                  backgroundColor: TangareColor.orange,
                                 ),
                               );
                             } catch (e) {
@@ -402,9 +398,10 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: TangareColor.white,
+                                      fontSize: 19,
                                     ),
                                   ),
-                                  backgroundColor: TangareColor.darkOrange,
+                                  backgroundColor: TangareColor.orange,
                                 ),
                               );
                             }
@@ -423,9 +420,10 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: TangareColor.white,
+                                      fontSize: 19,
                                     ),
                                   ),
-                                  backgroundColor: TangareColor.darkOrange,
+                                  backgroundColor: TangareColor.orange,
                                 ),
                               );
                             } catch (e) {
@@ -437,9 +435,10 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: TangareColor.white,
+                                      fontSize: 19,
                                     ),
                                   ),
-                                  backgroundColor: TangareColor.darkOrange,
+                                  backgroundColor: TangareColor.orange,
                                 ),
                               );
                             }
@@ -467,8 +466,8 @@ class _InventaryScreenState extends State<InventaryScreen> {
 
                 Container(
                   width: double.infinity,
-                  color: TangareColor.orange,
-                  padding: const EdgeInsets.only(top: 5, bottom: 40),
+                  color: TangareColor.black,
+                  padding: const EdgeInsets.only(top: 15, bottom: 40),
                   child: const Text(
                     'Agregar Nuevo Item',
                     textAlign: TextAlign.center,
