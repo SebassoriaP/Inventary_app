@@ -23,13 +23,212 @@ class _InventaryScreenState extends State<InventaryScreen> {
   final Map<String, bool> _editing = {};
   final Map<String, int> _tempQuantities = {};
 
-  // texto que escribe el usuario en la barra
+  //Text that the user write in the search bar
   String _searchTerm = '';
 
   bool _isEditing(String id) => _editing[id] ?? false;
 
   int _getDisplayQuantity(String id, int baseQty) {
     return _tempQuantities[id] ?? baseQty;
+  }
+
+  //Add button function
+  void _openAddItemSheet() {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController qtyController = TextEditingController();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // para que suba con el teclado
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: bottomInset + 24,
+          ),
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Agregar Nuevo Ítem',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: TangareColor.orange,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Item name
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Nombre del ítem',
+                    filled: true,
+                    fillColor: TangareColor.white,
+                    labelStyle: const TextStyle(color: TangareColor.darkOrange),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: TangareColor.orange, width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: TangareColor.darkOrange, width: 2.5),
+                    ),
+                  ),
+                  style: const TextStyle(color: TangareColor.darkOrange, fontWeight: FontWeight.bold),
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Ingresa un nombre de un Item';
+                    }
+                    return null;
+                  },
+                ),
+
+
+                const SizedBox(height: 12),
+
+                // Quantity input
+                TextFormField(
+                  controller: qtyController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Cantidad',
+                    filled: true,
+                    fillColor: TangareColor.white,
+                    labelStyle: const TextStyle(color: TangareColor.darkOrange),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: TangareColor.orange, width: 2),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: TangareColor.darkOrange, width: 2.5),
+                    ),
+                  ),
+                  
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Ingresa una cantidad';
+                    }
+                    final parsed = int.tryParse(value.trim());
+                    if (parsed == null || parsed < 0) {
+                      return 'Ingresa un número válido';
+                    }
+                    return null;
+                  },
+                  style: const TextStyle(color: TangareColor.darkOrange, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Botones
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: TangareColor.white,
+                          backgroundColor: TangareColor.black, 
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          'Cancelar',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: TangareColor.orange, 
+                          foregroundColor: TangareColor.white, 
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 3,
+                        ),
+                        onPressed: () async {
+                          if (!formKey.currentState!.validate()) return;
+
+                          final name = nameController.text.trim();
+                          final qty =
+                              int.parse(qtyController.text.trim());
+
+                          try {
+                            await forms.add({
+                              'item': name,
+                              'cantidad': qty,
+                            });
+
+                            if (!mounted) return;
+
+                            Navigator.of(context).pop(); 
+
+                            //Messages notification
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Ítem agregado al inventario',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: TangareColor.white,
+                                  ),
+                                ),
+                                backgroundColor: TangareColor.darkOrange,
+                              ),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Error al agregar: $e',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: TangareColor.white,
+                                  ),
+                                ),
+                                backgroundColor: TangareColor.darkOrange,
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text(
+                          'Guardar',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -262,9 +461,8 @@ class _InventaryScreenState extends State<InventaryScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 FooterWidget(
-                  onPressed: () {
-                    debugPrint('Me presionaste');
-                  },
+                  onPressed: _openAddItemSheet,
+                    //debugPrint('Me presionaste');
                 ),
 
                 Container(
