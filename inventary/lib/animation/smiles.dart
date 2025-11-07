@@ -43,7 +43,7 @@ class _SawCurveIntroState extends State<SawCurveIntro>
 @override
 void didChangeDependencies() {
   super.didChangeDependencies();
-  precacheImage(const AssetImage('assets/saw2.png'), context).then((_) {
+  precacheImage(const AssetImage('assets/saw.png'), context).then((_) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted && !_c.isAnimating && _c.value == 0.0) {
         // 👇 Espera 200 ms antes de iniciar

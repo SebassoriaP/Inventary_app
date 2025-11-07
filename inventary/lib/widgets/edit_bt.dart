@@ -13,6 +13,8 @@ class InventaryButtonWidget extends StatelessWidget {
   final VoidCallback? onDecrement;
   final VoidCallback? onSave;
   final VoidCallback? onDelete; 
+  final ValueChanged<int>? onQuantityChanged;
+  final TextEditingController? quantityController;
 
   const InventaryButtonWidget({
     super.key,
@@ -27,6 +29,8 @@ class InventaryButtonWidget extends StatelessWidget {
     this.onDecrement,
     this.onSave,
     this.onDelete,
+    this.onQuantityChanged,
+    this.quantityController,
   });
 
   @override
@@ -59,7 +63,7 @@ class InventaryButtonWidget extends StatelessWidget {
                           text,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: TangareColor.darkOrange,
+                            color: TangareColor.black, //TangareColor.black,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),
@@ -75,24 +79,71 @@ class InventaryButtonWidget extends StatelessWidget {
                         height: height,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: TangareColor.lightYellow,
+                          color: isEditing
+                              ? TangareColor.lightYellow // color cuando editas
+                              : TangareColor.white,       // color normal
                           borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          quantity.toString(),
-                          style: TextStyle(
-                            color: TangareColor.darkOrange,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            overflow: TextOverflow.ellipsis,
+                          border: Border.all(
+                            color: isEditing
+                                ? TangareColor.orange
+                                : TangareColor.lightYellow,
+                            width: 2,
                           ),
+                          boxShadow: [
+                            if (isEditing)
+                              BoxShadow(
+                                color: TangareColor.orange,
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                          ],
                         ),
+                        child: isEditing
+                            ? TextFormField(
+
+                                controller: quantityController,  
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: TangareColor.darkOrange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                onChanged: (value) {
+                                  if (onQuantityChanged == null) return;
+
+                                  final text = value.trim();
+
+                                  
+                                  if (text.isEmpty) {
+                                    return;
+                                  }
+
+                                  final parsed = int.tryParse(text);
+                                  if (parsed != null && parsed >= 0) {
+                                    onQuantityChanged!(parsed);
+                                  }
+                                },
+                              )
+                            : Text(
+                                quantity.toString(),
+                                style: const TextStyle(
+                                  color: TangareColor.darkOrange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                       ),
                     ),
 
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 16),
 
-                    // Edition Button
                     Container(
                       width: 65,
                       height: 65,
@@ -102,7 +153,7 @@ class InventaryButtonWidget extends StatelessWidget {
                         border: Border.all(color: TangareColor.orange, width: 2),
                       ),
                       child: IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.edit,
                           color: TangareColor.white,
                           size: 50,
@@ -110,6 +161,7 @@ class InventaryButtonWidget extends StatelessWidget {
                         onPressed: onPressed,
                       ),
                     ),
+                  
                   ],
                 ),
 

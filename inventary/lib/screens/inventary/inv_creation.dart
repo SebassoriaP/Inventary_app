@@ -23,14 +23,28 @@ class _InventaryScreenState extends State<InventaryScreen> {
   final Map<String, bool> _editing = {};
   final Map<String, int> _tempQuantities = {};
 
+  final Map<String, TextEditingController> _qtyControllers = {};
   //Text that the user write in the search bar
   String _searchTerm = '';
 
   bool _isEditing(String id) => _editing[id] ?? false;
 
   int _getDisplayQuantity(String id, int baseQty) {
-    return _tempQuantities[id] ?? baseQty;
+    if (_isEditing(id)) {
+      return _tempQuantities[id] ?? baseQty;
+    }
+    return baseQty;
   }
+
+  TextEditingController _getQtyController(String id, int initialValue) {
+    if (_qtyControllers.containsKey(id)) {
+      return _qtyControllers[id]!;
+    }
+    final controller = TextEditingController(text: initialValue.toString());
+    _qtyControllers[id] = controller;
+    return controller;
+  }
+
 
   //Add button function
   void _openAddItemSheet() {
@@ -52,7 +66,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
             left: 24,
             right: 24,
             top: 24,
-            bottom: bottomInset + 24,
+            bottom: bottomInset + 65,
           ),
           child: Form(
             key: formKey,
@@ -319,23 +333,29 @@ class _InventaryScreenState extends State<InventaryScreen> {
                                     ) ??
                                 0;
 
-                        final int displayCantidad =
-                            _getDisplayQuantity(id, baseCantidad);
+                        final int displayCantidad = _getDisplayQuantity(id, baseCantidad);
+
+                        final qtyController = _getQtyController(id, displayCantidad);
 
                         return InventaryButtonWidget(
                           text: itemName,
                           quantity: displayCantidad,
                           isEditing: _isEditing(id),
 
+                          quantityController: qtyController,
+
                           // Edit (toggle edition mode)
                           onPressed: () {
                             setState(() {
                               final current = _isEditing(id);
-                              _editing[id] = !current;
-
-                              if (!current &&
-                                  !_tempQuantities.containsKey(id)) {
-                                _tempQuantities[id] = baseCantidad;
+                              if (current) {
+                                _editing[id] = false;
+                                _tempQuantities.remove(id);
+                                qtyController.text = baseCantidad.toString();
+                              } else {
+                                _editing[id] = true;
+                                _tempQuantities[id] = displayCantidad;
+                                qtyController.text = displayCantidad.toString();
                               }
                             });
                           },
@@ -343,19 +363,34 @@ class _InventaryScreenState extends State<InventaryScreen> {
                           // Botón +
                           onIncrement: () {
                             setState(() {
-                              final current =
-                                  _tempQuantities[id] ?? baseCantidad;
-                              _tempQuantities[id] = current + 1;
+                              final current = _tempQuantities[id] ?? baseCantidad;
+                              final next = current + 1;
+                              _tempQuantities[id] = next;
+
+                              if (_isEditing(id)) {
+                                qtyController.text = next.toString();
+                              }
                             });
                           },
 
                           // Botón -
                           onDecrement: () {
                             setState(() {
-                              final current =
-                                  _tempQuantities[id] ?? baseCantidad;
+                              final current = _tempQuantities[id] ?? baseCantidad;
                               final next = current - 1;
-                              _tempQuantities[id] = next < 0 ? 0 : next;
+                              final safe = next < 0 ? 0 : next;
+                              _tempQuantities[id] = safe;
+
+                              if (_isEditing(id)) {
+                                qtyController.text = safe.toString();
+                              }
+                            });
+                          },
+
+                          // Cuando el usuario escribe en el input
+                          onQuantityChanged: (newValue) {
+                            setState(() {
+                              _tempQuantities[id] = newValue;
                             });
                           },
 
@@ -373,6 +408,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
                               setState(() {
                                 _editing[id] = false;
                                 _tempQuantities.remove(id);
+                                qtyController.text = newQty.toString();
                               });
 
                               ScaffoldMessenger.of(this.context).showSnackBar(
@@ -467,7 +503,7 @@ class _InventaryScreenState extends State<InventaryScreen> {
                 Container(
                   width: double.infinity,
                   color: TangareColor.black,
-                  padding: const EdgeInsets.only(top: 15, bottom: 40),
+                  padding: const EdgeInsets.only(top: 15, bottom: 60),
                   child: const Text(
                     'Agregar Nuevo Item',
                     textAlign: TextAlign.center,
