@@ -76,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 220,
                           width: double.infinity,
                           child: SawCurveIntro(),
+                          
                         ),
                         const SizedBox(height: 16),
                         Image.asset(

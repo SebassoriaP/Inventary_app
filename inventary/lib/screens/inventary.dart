@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/color_palette.dart';
 
-import 'package:inventary/screens/home.dart';
+// import 'package:inventary/screens/home.dart';
 import './inventary/inv_creation.dart';
 import './inventary/inv_results.dart';
 
@@ -15,13 +15,15 @@ class InventaryPanel extends StatefulWidget {
 }
 
 class _InventaryPanelState extends State<InventaryPanel> {
-  void _goHome() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
-  }
+
+  //Boton de volver atrás, lo quite pq nose que tan útil resulte
+  // void _goHome() {
+  //   Navigator.pushAndRemoveUntil(
+  //     context,
+  //     MaterialPageRoute(builder: (_) => const HomeScreen()),
+  //     (route) => false,
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +42,10 @@ class _InventaryPanelState extends State<InventaryPanel> {
           ),
           iconTheme: const IconThemeData(color: TangareColor.white),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: _goHome,
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.logout),
+            //   onPressed: _goHome,
+            // ),
           ],
           bottom: const TabBar(
             indicatorColor: TangareColor.yellow,
