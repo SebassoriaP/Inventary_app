@@ -280,80 +280,74 @@ void dispose() {
 }
 
   @override
-  Widget build(BuildContext context) {
+Widget build(BuildContext context) {
+  final bottomInset = MediaQuery.of(context).padding.bottom;
+
   return Scaffold(
     resizeToAvoidBottomInset: false,
-    body: SafeArea(
-      child: Stack(
-        children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-          child: Column(
-            children: [
-              // Search bar
-              SearchBarWidget(
-                onChanged: (value) {
-                  setState(() {
-                    _searchTerm = value.trim().toLowerCase();
-                  });
-                },
-              ),
+    body: Stack(
+      children: [
+        // ✅ Main content (safe only on top, not bottom)
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+            child: Column(
+              children: [
+                SearchBarWidget(
+                  onChanged: (value) {
+                    setState(() {
+                      _searchTerm = value.trim().toLowerCase();
+                    });
+                  },
+                ),
+                const SizedBox(height: 15),
+                const Divider(
+                  color: TangareColor.orange,
+                  thickness: 2,
+                  indent: 20,
+                  endIndent: 20,
+                ),
+                const SizedBox(height: 15),
 
-              const SizedBox(height: 15),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: forms.snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
 
-              const Divider(
-                color: TangareColor.orange,
-                thickness:2,
-                indent: 20,
-                endIndent: 20,
-              ),
-              const SizedBox(height: 15),
+                      final allDocs = snapshot.data!.docs;
 
-              // Items list
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: forms.snapshots(),
-                  builder: (context, snapshot) {
-                    // Loader inicial
-                    if (!snapshot.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+                      final filteredDocs = allDocs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final itemName =
+                            data['item']?.toString().toLowerCase() ?? '';
+                        if (_searchTerm.isEmpty) return true;
+                        return itemName.contains(_searchTerm);
+                      }).toList();
 
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text('Error: ${snapshot.error}'),
-                      );
-                    }
+                      if (filteredDocs.isEmpty) {
+                        return Center(
+                          child: Text(
+                            _searchTerm.isEmpty
+                                ? 'No hay elementos en el inventario'
+                                : 'No hay resultados para $_searchTerm',
+                            style: const TextStyle(fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        );
+                      }
 
-                    final allDocs = snapshot.data!.docs;
-
-                    // Filtrar por searchTerm (en campo 'item')
-                    final filteredDocs = allDocs.where((doc) {
-                      final data = doc.data() as Map<String, dynamic>;
-                      final itemName =
-                          data['item']?.toString().toLowerCase() ?? '';
-                      if (_searchTerm.isEmpty) return true;
-                      return itemName.contains(_searchTerm);
-                    }).toList();
-
-                    if (filteredDocs.isEmpty) {
-                      return Center(
-                        child: Text(
-                          _searchTerm.isEmpty
-                              ? 'No hay elementos en el inventario'
-                              : 'No hay resultados para $_searchTerm',
-                          style: const TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
-                      );
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 170),
+                      return ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 170),
                         itemCount: filteredDocs.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 20),
                         itemBuilder: (context, index) {
-                          // --- tu itemBuilder tal cual (no te lo cambio) ---
                           final doc = filteredDocs[index];
                           final data = doc.data() as Map<String, dynamic>;
                           final String id = doc.id;
@@ -364,7 +358,8 @@ void dispose() {
                           final dynamic rawCantidad = data['cantidad'];
                           final int baseCantidad = rawCantidad is int
                               ? rawCantidad
-                              : int.tryParse(rawCantidad?.toString() ?? '0') ?? 0;
+                              : int.tryParse(rawCantidad?.toString() ?? '0') ??
+                                  0;
 
                           final int displayCantidad =
                               _getDisplayQuantity(id, baseCantidad);
@@ -372,10 +367,13 @@ void dispose() {
                           final qtyController =
                               _getQtyController(id, displayCantidad);
 
-                          final String displayName = _getDisplayName(id, itemName);
-                          final nameController = _getNameController(id, displayName);
+                          final String displayName =
+                              _getDisplayName(id, itemName);
+                          final nameController =
+                              _getNameController(id, displayName);
 
-                          if (!_isEditing(id) && nameController.text != itemName) {
+                          if (!_isEditing(id) &&
+                              nameController.text != itemName) {
                             nameController.text = itemName;
                           }
 
@@ -385,9 +383,8 @@ void dispose() {
                             isEditing: _isEditing(id),
                             quantityController: qtyController,
                             nameController: nameController,
-                            onNameChanged: (v) {
-                              setState(() => _tempNames[id] = v);
-                            },
+                            onNameChanged: (v) =>
+                                setState(() => _tempNames[id] = v),
                             onPressed: () {
                               setState(() {
                                 final current = _isEditing(id);
@@ -401,33 +398,42 @@ void dispose() {
                                   _editing[id] = true;
                                   _tempQuantities[id] = displayCantidad;
                                   _tempNames[id] = itemName;
-                                  qtyController.text = displayCantidad.toString();
+                                  qtyController.text =
+                                      displayCantidad.toString();
                                   nameController.text = itemName;
                                 }
                               });
                             },
                             onIncrement: () {
                               setState(() {
-                                final current = _tempQuantities[id] ?? baseCantidad;
+                                final current =
+                                    _tempQuantities[id] ?? baseCantidad;
                                 final next = current + 1;
                                 _tempQuantities[id] = next;
-                                if (_isEditing(id)) qtyController.text = next.toString();
+                                if (_isEditing(id)) {
+                                  qtyController.text = next.toString();
+                                }
                               });
                             },
                             onDecrement: () {
                               setState(() {
-                                final current = _tempQuantities[id] ?? baseCantidad;
-                                final safe = (current - 1) < 0 ? 0 : (current - 1);
+                                final current =
+                                    _tempQuantities[id] ?? baseCantidad;
+                                final safe =
+                                    (current - 1) < 0 ? 0 : (current - 1);
                                 _tempQuantities[id] = safe;
-                                if (_isEditing(id)) qtyController.text = safe.toString();
+                                if (_isEditing(id)) {
+                                  qtyController.text = safe.toString();
+                                }
                               });
                             },
-                            onQuantityChanged: (newValue) {
-                              setState(() => _tempQuantities[id] = newValue);
-                            },
+                            onQuantityChanged: (newValue) =>
+                                setState(() => _tempQuantities[id] = newValue),
                             onSave: () async {
-                              final newQty = _tempQuantities[id] ?? baseCantidad;
-                              final newName = (_tempNames[id] ?? itemName).trim();
+                              final newQty =
+                                  _tempQuantities[id] ?? baseCantidad;
+                              final newName =
+                                  (_tempNames[id] ?? itemName).trim();
                               if (newName.isEmpty) return;
 
                               await doc.reference.update({
@@ -444,9 +450,7 @@ void dispose() {
                                 nameController.text = newName;
                               });
                             },
-                            onDelete: () async {
-                              await doc.reference.delete();
-                            },
+                            onDelete: () async => doc.reference.delete(),
                           );
                         },
                       );
@@ -456,39 +460,42 @@ void dispose() {
               ],
             ),
           ),
+        ),
 
-          // ===== FOOTER OVERLAY =====
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FooterWidget(
-                  onPressed: _openAddItemSheet,
-                  topColor: Colors.transparent,
-                  bottomColor: TangareColor.black,
+        // ✅ Footer MUST be sibling of SafeArea inside Stack
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FooterWidget(
+                onPressed: _openAddItemSheet,
+                topColor: Colors.transparent,
+                bottomColor: TangareColor.black,
+              ),
+              Container(
+                width: double.infinity,
+                color: TangareColor.black,
+                padding: EdgeInsets.only(
+                  top: 15,
+                  bottom: 50 + bottomInset, // ✅ fills the Android bottom area
                 ),
-                Container(
-                  width: double.infinity,
-                  color: TangareColor.black,
-                  padding: const EdgeInsets.only(top: 15, bottom: 60),
-                  child: const Text(
-                    'Agregar Nuevo Item',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                      color: TangareColor.white,
-                    ),
+                child: const Text(
+                  'Agregar Nuevo Item',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.bold,
+                    color: TangareColor.white,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }

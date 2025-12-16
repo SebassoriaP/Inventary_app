@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../utils/color_palette.dart';
 
 class InventaryButtonWidget extends StatelessWidget {
@@ -77,6 +78,7 @@ class InventaryButtonWidget extends StatelessWidget {
                   child: isEditing
                     ? TextFormField(
                         controller: nameController,
+                        autofocus: true,
                         keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.next,
                         minLines: 1,
@@ -176,86 +178,117 @@ class InventaryButtonWidget extends StatelessWidget {
 
               const SizedBox(width: 16),
 
-              Container(
-                width: 65,
-                height: 65,
-                decoration: BoxDecoration(
-                  color: TangareColor.black,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: TangareColor.orange, width: 2),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.edit,
-                    color: TangareColor.white,
-                    size: 50,
+              Material(
+                color: TangareColor.black,
+                shape: const CircleBorder(),
+                child: Container(
+                  width: 65,
+                  height: 65,
+                  decoration: BoxDecoration(
+                    color: TangareColor.black,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: TangareColor.orange, width: 2),
                   ),
-                  onPressed: onPressed,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.edit,
+                      color: TangareColor.white,
+                      size: 50,
+                    ),
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      onPressed();
+                    },
+                  ),
                 ),
               ),
             ],
           ),
 
-          if (isEditing) ...[
-            const SizedBox(height: 12),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SizedBox(
-                  width: 70,
-                  height: 70,
-                  child: ElevatedButton(
-                    onPressed: onDecrement,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: EdgeInsets.zero,
-                      backgroundColor: TangareColor.white,
-                      foregroundColor: TangareColor.orange,
-                      elevation: 4,
-                    ),
-                    child: const Icon(Icons.remove, size: 36),
-                  ),
-                ),
-                SizedBox(
-                  width: 70,
-                  height: 70,
-                  child: ElevatedButton(
-                    onPressed: onIncrement,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: EdgeInsets.zero,
-                      backgroundColor: TangareColor.white,
-                      foregroundColor: TangareColor.orange,
-                      elevation: 4,
-                    ),
-                    child: const Icon(Icons.add, size: 36),
-                  ),
-                ),
-              ],
+          AnimatedSize(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: isEditing ? 1.0 : 0.0,
+              child: isEditing
+                  ? Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            SizedBox(
+                              width: 70,
+                              height: 70,
+                              child: ElevatedButton(
+                                onPressed: onDecrement != null
+                                    ? () {
+                                        HapticFeedback.lightImpact();
+                                        onDecrement!();
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  shape: const CircleBorder(),
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: TangareColor.white,
+                                  foregroundColor: TangareColor.orange,
+                                  elevation: 4,
+                                ),
+                                child: const Icon(Icons.remove, size: 36),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 70,
+                              height: 70,
+                              child: ElevatedButton(
+                                onPressed: onIncrement != null
+                                    ? () {
+                                        HapticFeedback.lightImpact();
+                                        onIncrement!();
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  shape: const CircleBorder(),
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: TangareColor.white,
+                                  foregroundColor: TangareColor.orange,
+                                  elevation: 4,
+                                ),
+                                child: const Icon(Icons.add, size: 36),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: onSave != null
+                                ? () {
+                                    HapticFeedback.selectionClick();
+                                    onSave!();
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: TangareColor.yellow,
+                              foregroundColor: TangareColor.black,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: const Text(
+                              'GUARDAR',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
             ),
-
-            const SizedBox(height: 15),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: TangareColor.yellow,
-                  foregroundColor: TangareColor.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: const Text(
-                  'GUARDAR',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     ),
@@ -265,11 +298,15 @@ class InventaryButtonWidget extends StatelessWidget {
       Positioned(
         top: 0,
         left: 0,
-        child: SizedBox(
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: isEditing ? 1.0 : 0.0,
+          child: SizedBox(
           width: 52, // un poquito más grande = mejor tap
           height: 52,
           child: ElevatedButton(
             onPressed: () async {
+              HapticFeedback.selectionClick();
               final bool? confirmed = await showDialog<bool>(
                 context: context,
                 builder: (context) {
@@ -299,7 +336,10 @@ class InventaryButtonWidget extends StatelessWidget {
                         child: const Text('Cancelar'),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context).pop(true);
+                        },
                         child: const Text(
                           'Eliminar',
                           style: TextStyle(color: Colors.red),
@@ -325,6 +365,7 @@ class InventaryButtonWidget extends StatelessWidget {
           ),
         ),
       ),
+    ),
   ],
 ),
 
