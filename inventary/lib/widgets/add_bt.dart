@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:inventary/utils/color_palette.dart';
 
 class FooterWidget extends StatelessWidget {
@@ -49,7 +50,10 @@ class FooterWidget extends StatelessWidget {
               ),
               child: InkWell(
                 customBorder: const CircleBorder(),
-                onTap: onPressed,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onPressed();
+                },
                 child: const SizedBox(
                   width: 60,
                   height: 60,
