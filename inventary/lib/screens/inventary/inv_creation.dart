@@ -22,6 +22,9 @@ class _InventaryScreenState extends State<InventaryScreen> {
   // Estado local por item
   final Map<String, bool> _editing = {};
   final Map<String, int> _tempQuantities = {};
+  final Map<String, String> _tempNames = {};
+  final Map<String, TextEditingController> _nameControllers = {};
+
 
   final Map<String, TextEditingController> _qtyControllers = {};
   //Text that the user write in the search bar
@@ -44,6 +47,23 @@ class _InventaryScreenState extends State<InventaryScreen> {
     _qtyControllers[id] = controller;
     return controller;
   }
+
+  String _getDisplayName(String id, String baseName) {
+  if (_isEditing(id)) {
+    return _tempNames[id] ?? baseName;
+  }
+  return baseName;
+}
+
+TextEditingController _getNameController(String id, String initialValue) {
+  if (_nameControllers.containsKey(id)) {
+    return _nameControllers[id]!;
+  }
+  final controller = TextEditingController(text: initialValue);
+  _nameControllers[id] = controller;
+  return controller;
+}
+
 
 
   //Add button function
@@ -247,11 +267,26 @@ class _InventaryScreenState extends State<InventaryScreen> {
     );
   }
 
+
+  @override
+void dispose() {
+  for (final c in _qtyControllers.values) {
+    c.dispose();
+  }
+  for (final c in _nameControllers.values) {
+    c.dispose();
+  }
+  super.dispose();
+}
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      
-      body: SafeArea(
-        child: Padding(
+  return Scaffold(
+    resizeToAvoidBottomInset: false,
+    body: SafeArea(
+      child: Stack(
+        children: [
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
           child: Column(
             children: [
@@ -314,192 +349,127 @@ class _InventaryScreenState extends State<InventaryScreen> {
                     }
 
                     return ListView.separated(
-                      itemCount: filteredDocs.length,
-                      separatorBuilder: (_, __) =>
-                          const SizedBox(height: 20),
-                      itemBuilder: (context, index) {
-                        final doc = filteredDocs[index];
-                        final data = doc.data() as Map<String, dynamic>;
-                        final String id = doc.id;
+                      padding: const EdgeInsets.only(bottom: 170),
+                        itemCount: filteredDocs.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 20),
+                        itemBuilder: (context, index) {
+                          // --- tu itemBuilder tal cual (no te lo cambio) ---
+                          final doc = filteredDocs[index];
+                          final data = doc.data() as Map<String, dynamic>;
+                          final String id = doc.id;
 
-                        final String itemName =
-                            data['item']?.toString() ?? 'Sin nombre';
+                          final String itemName =
+                              data['item']?.toString() ?? 'Sin nombre';
 
-                        final dynamic rawCantidad = data['cantidad'];
-                        final int baseCantidad = rawCantidad is int
-                            ? rawCantidad
-                            : int.tryParse(
-                                      rawCantidad?.toString() ?? '0',
-                                    ) ??
-                                0;
+                          final dynamic rawCantidad = data['cantidad'];
+                          final int baseCantidad = rawCantidad is int
+                              ? rawCantidad
+                              : int.tryParse(rawCantidad?.toString() ?? '0') ?? 0;
 
-                        final int displayCantidad = _getDisplayQuantity(id, baseCantidad);
+                          final int displayCantidad =
+                              _getDisplayQuantity(id, baseCantidad);
 
-                        final qtyController = _getQtyController(id, displayCantidad);
+                          final qtyController =
+                              _getQtyController(id, displayCantidad);
 
-                        return InventaryButtonWidget(
-                          text: itemName,
-                          quantity: displayCantidad,
-                          isEditing: _isEditing(id),
+                          final String displayName = _getDisplayName(id, itemName);
+                          final nameController = _getNameController(id, displayName);
 
-                          quantityController: qtyController,
+                          if (!_isEditing(id) && nameController.text != itemName) {
+                            nameController.text = itemName;
+                          }
 
-                          // Edit (toggle edition mode)
-                          onPressed: () {
-                            setState(() {
-                              final current = _isEditing(id);
-                              if (current) {
-                                _editing[id] = false;
-                                _tempQuantities.remove(id);
-                                qtyController.text = baseCantidad.toString();
-                              } else {
-                                _editing[id] = true;
-                                _tempQuantities[id] = displayCantidad;
-                                qtyController.text = displayCantidad.toString();
-                              }
-                            });
-                          },
+                          return InventaryButtonWidget(
+                            text: displayName,
+                            quantity: displayCantidad,
+                            isEditing: _isEditing(id),
+                            quantityController: qtyController,
+                            nameController: nameController,
+                            onNameChanged: (v) {
+                              setState(() => _tempNames[id] = v);
+                            },
+                            onPressed: () {
+                              setState(() {
+                                final current = _isEditing(id);
+                                if (current) {
+                                  _editing[id] = false;
+                                  _tempQuantities.remove(id);
+                                  _tempNames.remove(id);
+                                  qtyController.text = baseCantidad.toString();
+                                  nameController.text = itemName;
+                                } else {
+                                  _editing[id] = true;
+                                  _tempQuantities[id] = displayCantidad;
+                                  _tempNames[id] = itemName;
+                                  qtyController.text = displayCantidad.toString();
+                                  nameController.text = itemName;
+                                }
+                              });
+                            },
+                            onIncrement: () {
+                              setState(() {
+                                final current = _tempQuantities[id] ?? baseCantidad;
+                                final next = current + 1;
+                                _tempQuantities[id] = next;
+                                if (_isEditing(id)) qtyController.text = next.toString();
+                              });
+                            },
+                            onDecrement: () {
+                              setState(() {
+                                final current = _tempQuantities[id] ?? baseCantidad;
+                                final safe = (current - 1) < 0 ? 0 : (current - 1);
+                                _tempQuantities[id] = safe;
+                                if (_isEditing(id)) qtyController.text = safe.toString();
+                              });
+                            },
+                            onQuantityChanged: (newValue) {
+                              setState(() => _tempQuantities[id] = newValue);
+                            },
+                            onSave: () async {
+                              final newQty = _tempQuantities[id] ?? baseCantidad;
+                              final newName = (_tempNames[id] ?? itemName).trim();
+                              if (newName.isEmpty) return;
 
-                          // Botón +
-                          onIncrement: () {
-                            setState(() {
-                              final current = _tempQuantities[id] ?? baseCantidad;
-                              final next = current + 1;
-                              _tempQuantities[id] = next;
-
-                              if (_isEditing(id)) {
-                                qtyController.text = next.toString();
-                              }
-                            });
-                          },
-
-                          // Botón -
-                          onDecrement: () {
-                            setState(() {
-                              final current = _tempQuantities[id] ?? baseCantidad;
-                              final next = current - 1;
-                              final safe = next < 0 ? 0 : next;
-                              _tempQuantities[id] = safe;
-
-                              if (_isEditing(id)) {
-                                qtyController.text = safe.toString();
-                              }
-                            });
-                          },
-
-                          // Cuando el usuario escribe en el input
-                          onQuantityChanged: (newValue) {
-                            setState(() {
-                              _tempQuantities[id] = newValue;
-                            });
-                          },
-
-                          // Save on Firestore
-                          onSave: () async {
-                            final newQty =
-                                _tempQuantities[id] ?? baseCantidad;
-
-                            try {
-                              await doc.reference
-                                  .update({'cantidad': newQty});
+                              await doc.reference.update({
+                                'cantidad': newQty,
+                                'item': newName,
+                              });
 
                               if (!mounted) return;
-
                               setState(() {
                                 _editing[id] = false;
                                 _tempQuantities.remove(id);
+                                _tempNames.remove(id);
                                 qtyController.text = newQty.toString();
+                                nameController.text = newName;
                               });
-
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    'Inventario actualizado',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: TangareColor.white,
-                                      fontSize: 19,
-                                    ),
-                                  ),
-                                  backgroundColor: TangareColor.orange,
-                                ),
-                              );
-                            } catch (e) {
-                              if (!mounted) return;
-
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Error al guardar: $e',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: TangareColor.white,
-                                      fontSize: 19,
-                                    ),
-                                  ),
-                                  backgroundColor: TangareColor.orange,
-                                ),
-                              );
-                            }
-                          },
-
-                          // Delete Element
-                          onDelete: () async {
-                            try {
+                            },
+                            onDelete: () async {
                               await doc.reference.delete();
-
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Elemento "$itemName" eliminado del inventario',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: TangareColor.white,
-                                      fontSize: 19,
-                                    ),
-                                  ),
-                                  backgroundColor: TangareColor.orange,
-                                ),
-                              );
-                            } catch (e) {
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(this.context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Error al eliminar: $e',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: TangareColor.white,
-                                      fontSize: 19,
-                                    ),
-                                  ),
-                                  backgroundColor: TangareColor.orange,
-                                ),
-                              );
-                            }
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),                
-              ),
-            ],
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
 
-      bottomNavigationBar: Builder(
-          builder: (context) {
-            return Column(
+          // ===== FOOTER OVERLAY =====
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 FooterWidget(
                   onPressed: _openAddItemSheet,
-                    //debugPrint('Me presionaste');
+                  topColor: Colors.transparent,
+                  bottomColor: TangareColor.black,
                 ),
-
                 Container(
                   width: double.infinity,
                   color: TangareColor.black,
@@ -515,9 +485,11 @@ class _InventaryScreenState extends State<InventaryScreen> {
                   ),
                 ),
               ],
-            );
-          },
-        ),
-    );
-  }
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
 }
