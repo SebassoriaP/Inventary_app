@@ -281,13 +281,15 @@ void dispose() {
 
   @override
 Widget build(BuildContext context) {
-  final bottomInset = MediaQuery.of(context).padding.bottom;
+  final safeBottom = MediaQuery.of(context).padding.bottom;     // barra Android
+  final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0; // teclado
+
 
   return Scaffold(
     resizeToAvoidBottomInset: false,
     body: Stack(
       children: [
-        // ✅ Main content (safe only on top, not bottom)
+        //  Main content (safe only on top, not bottom)
         SafeArea(
           bottom: false,
           child: Padding(
@@ -461,40 +463,41 @@ Widget build(BuildContext context) {
             ),
           ),
         ),
-
-        // ✅ Footer MUST be sibling of SafeArea inside Stack
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FooterWidget(
-                onPressed: _openAddItemSheet,
-                topColor: Colors.transparent,
-                bottomColor: TangareColor.black,
-              ),
-              Container(
-                width: double.infinity,
-                color: TangareColor.black,
-                padding: EdgeInsets.only(
-                  top: 15,
-                  bottom: 50 + bottomInset, // ✅ fills the Android bottom area
+        // ✅ Oculta el footer cuando el teclado está abierto
+        if (!keyboardOpen)
+        // Footer MUST be sibling of SafeArea inside Stack
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FooterWidget(
+                  onPressed: _openAddItemSheet,
+                  topColor: Colors.transparent,
+                  bottomColor: TangareColor.black,
                 ),
-                child: const Text(
-                  'Agregar Nuevo Item',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    color: TangareColor.white,
+                Container(
+                  width: double.infinity,
+                  color: TangareColor.black,
+                  padding: EdgeInsets.only(
+                    top: 15,
+                    bottom: 50 + safeBottom, // ✅fills the Android bottom area
+                  ),
+                  child: const Text(
+                    'Agregar Nuevo Item',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: TangareColor.white,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
       ],
     ),
   );

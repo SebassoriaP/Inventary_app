@@ -47,8 +47,8 @@ class _InvResultsState extends State<InvResults> {
 
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        final item = (data['item'] ?? '').toString().replaceAll(',', ' ');
-        final cantidad = data['cantidad'] ?? 0;
+        final item = (data['Nombre'] ?? '').toString().replaceAll(',', ' ');
+        final cantidad = data['Unidad'] ?? 0;
 
         buffer.writeln('$item,$cantidad');
       }
