@@ -43,12 +43,12 @@ class _InvResultsState extends State<InvResults> {
 
       //Create the CSV content
       final buffer = StringBuffer();
-      buffer.writeln('Item,Cantidad');
+      buffer.writeln('Nombre,Unidad');
 
       for (final doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        final item = (data['Nombre'] ?? '').toString().replaceAll(',', ' ');
-        final cantidad = data['Unidad'] ?? 0;
+        final item = (data['item'] ?? '').toString().replaceAll(',', ' ');
+        final cantidad = data['cantidad'] ?? 0;
 
         buffer.writeln('$item,$cantidad');
       }
