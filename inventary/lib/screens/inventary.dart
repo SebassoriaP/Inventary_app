@@ -30,6 +30,7 @@ class _InventaryPanelState extends State<InventaryPanel> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: TangareColor.orange,

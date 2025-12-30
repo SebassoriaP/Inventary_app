@@ -16,6 +16,40 @@ class InventaryScreen extends StatefulWidget {
 }
 
 class _InventaryScreenState extends State<InventaryScreen> {
+  bool _hasTextFocus = false;
+
+void _handleFocusChange() {
+  final node = FocusManager.instance.primaryFocus;
+
+  // Solo ocultar si el foco es un TextField/TextFormField
+  final isTextInput = node?.context?.widget is EditableText;
+
+  if (isTextInput != _hasTextFocus) {
+    setState(() => _hasTextFocus = isTextInput);
+  }
+}
+
+@override
+void initState() {
+  super.initState();
+  FocusManager.instance.addListener(_handleFocusChange);
+}
+
+@override
+void dispose() {
+  FocusManager.instance.removeListener(_handleFocusChange);
+
+  for (final c in _qtyControllers.values) {
+    c.dispose();
+  }
+  for (final c in _nameControllers.values) {
+    c.dispose();
+  }
+  super.dispose();
+}
+
+
+
   final CollectionReference forms =
       FirebaseFirestore.instance.collection('inventario');
 
@@ -269,23 +303,15 @@ TextEditingController _getNameController(String id, String initialValue) {
 
 
   @override
-void dispose() {
-  for (final c in _qtyControllers.values) {
-    c.dispose();
-  }
-  for (final c in _nameControllers.values) {
-    c.dispose();
-  }
-  super.dispose();
-}
 
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.of(context).padding.bottom;     // barra Android
     
     // Usa viewInsets del contexto del Scaffold (el real)
-    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
-    final keyboardOpen = keyboardInset > 0;
+    final keyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+    final hideFooter = keyboardOpen || _hasTextFocus;
+
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -474,7 +500,7 @@ void dispose() {
             right: 0,
             bottom: 0,
             child: Offstage(
-              offstage: keyboardOpen,
+              offstage: hideFooter,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
